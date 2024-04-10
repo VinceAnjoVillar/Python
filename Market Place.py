@@ -1,4 +1,4 @@
-from colorama import init, Fore, Style
+import datetime
 import time
 
 market = {
@@ -21,6 +21,7 @@ market = {
 
 user_acc = {}
 basket = {}
+purchase_history = {}
 
 admin_user = 'admin'
 admin_password = 'password'
@@ -231,18 +232,23 @@ def directions():
     if choice == '1':
         print()
         text_appear_Time('In order to log in, you must sign-up first with your username and password by pressing "1". Remember that the password length must be 8 characters or more!\n', 0.05)
+        directions()
     elif choice == 2:
         print()
         text_appear_Time('In order to purchase, you must enter the category one by one, first enter the Category then the brand and the quantity and it will automatically go to your basket\n', 0.05)
+        directions()
     elif choice == 3:
         print()
         text_appear_Time('After Adding products to your basket, you can edit your basket to remove an item and after that you can check out all of your items\n', 0.05)
+        directions()
     elif choice == 4:
         print()
         text_appear_Time('If you have no balance, you can go to bank for a money transfer which you can use for paying\n', 0.05)
+        directions()
     elif choice == 5:
         print()
         text_appear_Time('For every $1 you will receive a 0.12 amount of points where you can also use for paying\n', 0.05)
+        directions()
     elif choice == 6:
         home_page()
     else:
@@ -257,23 +263,27 @@ def marketplace(username):
     print('4. Go to bank')
     print('5. Check and Redeem points')
     print('6. Account Details')
-    print('7. Log-out')
+    print('7. Purchase History')
+    print('8. Log-out')
 
-    choice = input('Enter choice: ')
-    if choice == '1':
+    choice = int(input('Enter choice: '))
+    if choice == 1:
         display_market(username)
-    elif choice == '2':
+    elif choice == 2:
         shop_now(username)
-    elif choice == '3':
+    elif choice == 3:
         checkout(username)
-    elif choice == '4':
+    elif choice == 4:
         bank(username)
-    elif choice == '5':
+    elif choice == 5:
         redeem_and_check_points(username)
     elif choice == 6:
         account_details(username)
-    elif choice == '7':
+    elif choice == 7:
+        view_purchase_history(username)
+    elif choice == 8:
         home_page()
+
     else:
         print('Invalid Input')
         marketplace(username)
@@ -347,6 +357,8 @@ def shop_now(username):
 
 def checkout(username):
     total_price = 0
+    purchase_details = []
+
     print("\nYour Basket:")
     if username in basket:
         for category, brands in basket[username].items():
@@ -354,7 +366,10 @@ def checkout(username):
                 price_per_item = market[category][brand]['price']
                 total_price += price_per_item * quantity
                 print(f"{quantity} {brand} {category} - Price: {price_per_item * quantity}")
-
+        
+        timestamp = datetime.datetime.now()
+        purchase_history.setdefault(username, []).append({'timestamp': timestamp, 'items': purchase_details, 'total_price': total_price})
+        
         print(f"\nTotal Price: {total_price}")
         while True:
             choice = input("Would you like to edit your basket? (yes/no): ").strip().lower()
@@ -490,19 +505,36 @@ def redeem_and_check_points(username):
             print('Invalid input! Please enter a valid choice.')
 
 def account_details(username):
-    print('\nAccount Details')
-    print(f'Username : {user_acc[username]["username"]}')
-    print(f'Money: {user_acc[username]['money']}')
-    print(f'Points: {user_acc[username]['points']}')
+    print("\nAccount Details:")
+    print(f"Username: {username}")
+    print(f"Balance: ${user_acc[username]['money']}")
+    print(f"Points: {user_acc[username]['points']}")
+    
+    choice = input("Enter BACK to go back to menu: ")
+    if choice.upper() == 'BACK':
+        marketplace(username)
+    else:
+        print('Invalid Input')
+        account_details(username)
 
+def view_purchase_history(username):
+    print('\nPurchase History: ')
+    if username in purchase_history:
+        for index, purchase in enumerate(purchase_history[username], start=1):
+            print(f'Pruchase {index}: ')
+            print(f'Timestamp: {purchase["timestamp"]}')
+            print(f'Items Purchased: ')
+            for item in purchase['items']:
+                print(item)
+            print(f'Total Price: {purchase["total_price"]}')
+    else:
+        print('No Purchase History Found')
     while True:
-        choice = input("Enter BACK to go back to menu: ")
+        choice = input('Enter BACK to return to menu: ')
         if choice.upper() == 'BACK':
             marketplace(username)
         else:
             print('Invalid Input')
-            account_details(username)
-
-
+            view_purchase_history(username)
 
 home_page()
