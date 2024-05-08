@@ -185,7 +185,7 @@ def admin_edit():
             brand = ''
             stock = 0
             price = 0
-            market[new_product] = {'brand': brand, 'stocks': stock, 'price': price}
+            market[new_product] = {'brand': brand, 'stock': stock, 'price': price}
             print(f'{new_product} was added successfully to products\n')
             return admin_edit()
         else:
